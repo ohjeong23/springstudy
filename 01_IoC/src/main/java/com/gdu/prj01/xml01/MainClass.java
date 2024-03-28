@@ -50,6 +50,8 @@ public class MainClass {
   }
   
   
+
+  
   public static void method3() {
     
     AbstractApplicationContext ctx = new GenericXmlApplicationContext("com/gdu/prj01/xml01/appCtx.xml");
@@ -63,6 +65,7 @@ public class MainClass {
     computer2.getCalculator().mul(10,5);
     computer2.getCalculator().div(10,5);
     
+    
     ctx.close();
     
   }
@@ -71,6 +74,8 @@ public class MainClass {
   public static void main(String[] args) {
   //new IoC xml로 만든 작업 
     method3();
+    
+    
   }
 
 }

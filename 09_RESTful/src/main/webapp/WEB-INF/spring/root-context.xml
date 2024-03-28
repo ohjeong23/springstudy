@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+  
+  <!-- Root Context: defines shared resources visible to all other web components -->
+  
+  <bean class="com.zaxxer.hikari.HikariConfig"
+        id="hikariConfig"
+        scope="singleton">
+    <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+    <property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@localhost:1521:xe"/>
+    <property name="username" value="GD"/>
+    <property name="password" value="1111"/>
+  </bean>
+  
+  <bean class="com.zaxxer.hikari.HikariDataSource"
+        id="hikariDataSource"
+        scope="singleton">
+    <constructor-arg ref="hikariConfig"/>
+  </bean>
+  
+  <bean class="org.mybatis.spring.SqlSessionFactoryBean"
+        id="sqlSessionFactoryBean"
+        scope="singleton">
+    <property name="dataSource" ref="hikariDataSource"/>
+    <property name="configLocation"  value="classpath:com/gdu/prj09/mybatis/config/mybatis-config.xml"/>
+    <property name="mapperLocations" value="classpath:com/gdu/prj09/mybatis/mapper/*.xml"/>
+  </bean>
+  
+  <bean class="org.mybatis.spring.SqlSessionTemplate"
+        id="sqlSessionTemplate"
+        scope="singleton">
+    <constructor-arg ref="sqlSessionFactoryBean"/>
+  </bean>
+  
+  <bean class="com.gdu.prj09.dao.MemberDaoImpl"
+        id="memberDao"
+        scope="singleton">
+    <constructor-arg ref="sqlSessionTemplate"/>
+  </bean>
+  
+  <bean class="com.gdu.prj09.utils.MyPageUtils"
+        id="myPageUtils"
+        scope="singleton"/>
+        
+        
+        
+        
+  <!-- 서비스는 생성자를 호출하게 되어있음 -->
+  <bean class="com.gdu.prj09.service.MemberServiceImpl"
+        id="memberService"
+        scope="singleton">
+    <constructor-arg ref="memberDao"/>
+    <constructor-arg ref="myPageUtils"/>
+  </bean>
+  
+
+<!-- 컨트롤러가 빈으로 등록되어 있는데 @appcon -->
+ <bean class="com.gdu.prj09.controller.MemberController"
+       id="memberController"
+       scope="singleton">
+       <constructor-arg ref="memberService"/>
+       </bean>
+       
+
+  <!-- 트랜잭션 관리자 등록 -->
+  <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+        id="dataSourceTransactionManager"
+        scope="singleton">
+    <property name="dataSource" ref="hikariDataSource"/>
+  </bean>
+  
+  <!-- 트랜잭션 Advice 등록 -->
+  <tx:advice transaction-manager="dataSourceTransactionManager"
+             id="txAdvice">
+    <tx:attributes>
+      <tx:method name="*"/>
+      <tx:method name="get*" read-only="true"/>
+    </tx:attributes>
+  </tx:advice>
+  
+  <!-- Aspect 설정 -->
+  <aop:config>
+    <aop:pointcut expression="execution (* com.gdu.prj09.service.*Impl.*(..))"
+                  id="txPointCut"/>
+    <aop:advisor advice-ref="txAdvice"
+                 pointcut-ref="txPointCut"/>
+  </aop:config>
+  
+  <!-- AspectJ 허용 (@EnableAspectJAutoProxy) -->
+  <aop:aspectj-autoproxy/>
+  
+  
+</beans>

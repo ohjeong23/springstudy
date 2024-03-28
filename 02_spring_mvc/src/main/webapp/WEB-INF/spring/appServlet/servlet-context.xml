@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- mapping 인터넷 유알엘 주소 resources로 시작하는 모든 주소 이 위치의 파일과 연결해라 정적 자원 보관 에셋 asset 리소시스로 시작하는 주소로 만들기
+  Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+<!-- 
+  <resources> 태그
+  1. 정적 자원(image, css, js 등)을 관리하는 태그이다.
+  2. 속성
+    1) mapping  : 주소가 /contextPath/resources/** 인 주소 
+    2) location : mapping 과 연결할 실제 디렉터리 이름 
+    /prj02 주소로 컨텍스트 패치 webapp/resources, contextpath = webapp 
+    스프링에선 주소로 감 ${contextPath}/resources/image/404.
+ -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- bean class가 타입 경로에 참견하는게 뷰 리졸버
+  앞뒤로 값을 붙여서 경로를 정함 뷰 폴더 밑에 경로 
+  컨트롤러에서 반환할 제이에스피 경로를 적을때 .jsp 이런거 적지 말기 여기서 해주니까
+  
+  Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+<!-- 
+  InternalResourceViewResolver 클래스
+  1. 컨트롤러가 응답하는 jsp 의 경로를 결정한다.
+  2. 필드
+    1) prefix : 컨트롤러가 응답하는 jsp 경로 앞에 추가한다.  
+    2) suffix : 컨트롤러가 응답하는 jsp 경로 뒤에 추가한다.
+  3. 예시
+    1) 컨트롤러가  응답한 jsp 경로  : board/list
+    2) 뷰 리졸버가 응답한 jsp 경로 : /WEB-INF/views/board/list.jsp
+  -->
+
+
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	
+  
+  <!-- 컴포넌트(빈)를 찾는 기본 패키지 위치 
+       이 경로가 잘못되면 실행이 안됨 
+       패키지 추가할때 베이스 패키지가 바뀔 수 있으니 조심해야 한다.
+       
+       -->
+	<context:component-scan base-package="com.gdu.prj02" />
+  
+	
+	
+	
+</beans:beans>

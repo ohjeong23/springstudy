@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean class="com.gdu.prj01.xml03.MyConnection"
+        id="myConnection"
+        scope="singleton">
+    <property name="driver" value="oracle.jdbc.OracleDriver"/>
+    <property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+    <property name="user" value="GD"/>
+    <property name="password" value="1111"/>
+  </bean>
+
+  <bean class="com.gdu.prj01.xml03.MyDao"
+      id ="myDao"
+      scope="singleton">
+      <property name="myConnection" ref="myConnection"></property> 
+      <!-- 위에 빈이 밑에꺼에 이름과 래퍼랜스로 되어있어서 결국엔 위에꺼까지 가져가게 됨-->
+      </bean>
+  
+  <bean class="com.gdu.prj01.xml03.MyService"
+        id="myService"
+        scope="singleton">
+        <property name="myDao" ref="myDao"></property>
+        <!-- 집어넣는건 컨텍슨트에서  만들어서 setter를 집어넣는 방식 -->
+        </bean>
+  <bean class="com.gdu.prj01.xml03.MyController"
+        id="myController"
+        scope="singleton">
+        <property name="myService" ref="myService"></property>
+        </bean>
+<!-- 위에서 주고 받고 주고 받고해서 myService가 잘 동작하면 잘 받아온거 -->
+
+</beans>

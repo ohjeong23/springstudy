@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gdu.prj08.mybatis.mapper.file_t">
+
+
+    <insert id="insertHistory"
+            parameterType="HistoryDto">
+             <selectKey keyProperty="historyNo" order="BEFORE">
+               SELECT HISTORY_SEQ.NEXTVAL  
+               FROM DUAL
+             
+             </selectKey>
+             <!-- 히스토리디티오에서 시퀀스 번호 꺼내서 히스토리 넘버로 먼저 가지고 감 
+                  다오나 서비스에서 온게 아니라 히스토리 디티오에서 옴-->
+             INSERT INTO HISTORY_T(
+                 HISTORY_NO
+                 , WRITER
+                 , IP
+             ) VALUES (
+                 #{historyNo}
+                ,#{writer}
+                ,#{ip}
+             )   
+             </insert>
+
+
+  
+  <!-- 키본키와 외래키 insert 
+  히스토리태그의 히스토리만 남기고 번호는 히스토리 시퀀스가 남겨주고 입력받는게 작성자 
+  
+  
+  
+   -->
+    
+
+  <insert id="registerFile"
+          parameterType="FileDto">
+    INSERT INTO FILE_T (
+        FILE_NO
+      , UPLOAD_PATH
+      , ORIGINAL_FILENAME
+      , FILESYSTEM_NAME
+      , HISTORY_NO
+    ) VALUES (
+        FILE_SEQ.NEXTVAL
+      , #{uploadPath}
+      , #{originalFilename}
+      , #{filesystemName}
+      , #{historyNo}
+    )
+  </insert>
+
+  <update id="modifyFile"
+          parameterType="FileDto">
+    UPDATE FILE_T
+       SET UPLOADPATH = #{uploadPath}
+         , ORIGINALFILENAME = #{originalFilename}
+         , FILESYSTEMNAME = #{filesystemName}
+         , HISTROY_NO= #{historyNo}
+     WHERE FILE_NO = #{contactNo}
+  </update>
+
+  <delete id="removeFile">
+    DELETE
+      FROM FILE_T
+     WHERE FILE_NO = #{fileNo}
+  </delete>
+  
+  <select id="getFileList"
+          resultType="FileDto">
+    SELECT FILE_NO, UPLOAD_PATH, ORIGIANL_FILENAME, FILESYSTEM_NAME,HISTORY_NO
+      FROM FILE_T
+     ORDER BY FILE_NO DESC
+  </select>
+
+  <select id="getFilefByNo"
+          resultType="FileDto">
+    SELECT FILE_NO, UPLOAD_PATH,ORIGIANL_FILENAME ,FILESYSTEM_NAME , HISTORY_NO
+      FROM FILE_T
+     WHERE FILE_NO = #{fileNo}
+  </select>
+
+</mapper>
