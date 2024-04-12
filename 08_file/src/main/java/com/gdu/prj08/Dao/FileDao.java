@@ -1,22 +1,9 @@
-package com.gdu.prj08.Dao;
+package com.gdu.prj08.dao;
 
-import java.util.List;
-
-import com.gdu.prj08.Dto.FileDto;
-import com.gdu.prj08.Dto.HistroyDto;
+import com.gdu.prj08.dto.FileDto;
+import com.gdu.prj08.dto.HistoryDto;
 
 public interface FileDao {
-  
-  int registerFile(FileDto file);
-  int modifyFile(FileDto file);
-  int removeFile(int fileNo);
-  List<FileDto> getFileList();
-  FileDto getFileByNo(int fileNo);
-  
-  
-  
-  
-  
-  
-
+  int insertHistory(HistoryDto history);
+  int insertFile(FileDto file);
 }

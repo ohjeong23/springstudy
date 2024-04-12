@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,9 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.gdu.myapp.dto.UserDto;
 import com.gdu.myapp.service.UserService;
 
-@RequestMapping("/user") 
+@RequestMapping("/user")
 @Controller
 public class UserController {
 
@@ -27,36 +27,50 @@ public class UserController {
     this.userService = userService;
   }
   
+  @GetMapping("/signup.page")
+  public String signupPage() {
+    return "user/signup";
+  }
+  
+  @PostMapping(value="/checkEmail.do", produces="application/json")
+  public ResponseEntity<Map<String, Object>> checkEmail(@RequestBody Map<String, Object> params) {
+    return userService.checkEmail(params);
+  }
+  
+  @PostMapping(value="/sendCode.do", produces="application/json")
+  public ResponseEntity<Map<String, Object>> sendCode(@RequestBody Map<String, Object> params) {
+    return userService.sendCode(params);
+  }
+  
+  @PostMapping("/signup.do")
+  public void signup(HttpServletRequest request, HttpServletResponse response) {
+    userService.signup(request, response);
+  }
+  
+  @GetMapping("/leave.do")
+  public void leave(HttpServletRequest request, HttpServletResponse response) {
+    userService.leave(request, response);
+  }
+  /*
+  @GetMapping("/leave.do")
+  public void leave(HttpSession session, HttpServletResponse response) {
+    UserDto user = (UserDto) session.getAttribute("user");
+  }
+  @GetMapping("/leave.do")
+  public void leave(@SessionAttribute(name="user") UserDto user, HttpServletResponse response) {   
+  }
+  */
+  
   @GetMapping("/signin.page")
   public String signinPage(HttpServletRequest request
-                         , Model model) { //리퀘스트의 header안에 referer 라는 값으로 들어있는거임  블로그 보다가 로그인하고서 이전 페이지의 정보를 가지고 있는거임 
+                         , Model model) {
     
-    // Sign In 페이지 이전의 주소가 저장되어 있는 Request Header 의 referer
-    String referer = request.getHeader("referer"); //로그인 이후 돌아갈 주소이기 때문에 필요
+    // Sign In 페이지로 url 넘겨 주기 (로그인 후 이동할 경로를 의미함)
+    model.addAttribute("url",  userService.getRedirectURLAfterSignin(request));
     
-    //
+    // Sign In 페이지로 naverLoginURL 넘겨 주기 (네이버 로그인 요청 주소를 의미함)
+    model.addAttribute("naverLoginURL", userService.getNaverLoginURL(request));
     
-    
-    // referer 로 돌아가면 안 되는 예외 상황 (아이디/비밀번호 찾기 화면, 가입 화면 등)
-    String[] excludeUrls = {"/findId.page","/findPw.page","/signup.page"}; //쓰면 안되는 유알엘
-    //여기서 하나씩 봅아서 체크
-    
-    // Sign In 이후 이동할 url
-    String url = referer; // 사이트 오자마자 로그인 하는 곳 
-    if(referer != null) { //referer가 항상 있진 않음  들어가자마자 로그인하는 사이트는 리퍼럴 값이 없음 
-      for(String excludeUrl : excludeUrls) { //리퍼럴에 가면 안되는 주소가 있는지 확인
-        if(referer.contains(excludeUrl)) {
-          url = request.getContextPath() + "/main.page"; //가면 안되는 곳에 포함되면 메인페이지로 보내주겠다.
-          break; //기본적으로 리퍼럴이 유알엘인데 가면 안되면 바꿈 리퍼럴이 없어도 바꿔줌
-        }
-      }
-    } else {
-      url = request.getContextPath() + "/main.page";  //발견하면 바로 브레이크//mvc controller 에서 함 
-    }
-    
-    // Sign In 페이지로 url 넘겨 주기
-    model.addAttribute("url",  url); //값을 가지면 유알엘 값 으로 아니면 리퍼럴값으로// 예외 주소에 포함되어 있는지에 따라  무조건 넘겨주는건 아님 
-     //모델에 저장해서 리턴했으니 포워드 한것 포워드때 전달할 데이터 모델에  
     return "user/signin";
     
   }
@@ -66,25 +80,39 @@ public class UserController {
     userService.signin(request, response);
   }
   
-  @GetMapping("/signup.page")
-  public String signupPage() {
+  @GetMapping("/naver/getAccessToken.do")
+  public String getAccessToken(HttpServletRequest request) {
+    String accessToken = userService.getNaverLoginAccessToken(request);
+    return "redirect:/user/naver/getProfile.do?accessToken=" + accessToken;
+  }
+  
+  @GetMapping("/naver/getProfile.do")
+  public String getProfile(HttpServletRequest request, Model model) {
     
-    return "user/signup"; 
+    // 네이버로부터 받은 프로필 정보
+    UserDto naverUser = userService.getNaverLoginProfile(request.getParameter("accessToken"));
+    
+    // 반환 경로
+    String path = null;
+    
+    // 프로필이 DB에 있는지 확인 (있으면 Sign In, 없으면 Sign Up)
+    if(userService.hasUser(naverUser)) {
+      // Sign In
+      userService.naverSignin(request, naverUser);
+      path = "redirect:/main.page";
+    } else {
+      // Sign Up (네이버 가입 화면으로 이동)
+      model.addAttribute("naverUser", naverUser);
+      path = "user/naver_signup";
+    }
+    
+    return path;
+    
   }
   
-  @PostMapping(value="/checkEmail.do", produces="application/json")
-  public ResponseEntity<Map<String, Object>> checkEmail(@RequestBody Map<String, Object> params) {
-    return userService.checkEmail(params); //컨트롤러에 오자마자 화면으로 다시감 서비스가 다 이미 했음. 서비스로부터 받아서 서빙만 함.
+  @GetMapping("/signout.do")
+  public void signout(HttpServletRequest request, HttpServletResponse response) {
+    userService.signout(request, response);
   }
-  
-  
-  @PostMapping(value="/sendCode.do", produces="application/json")
-  public ResponseEntity<Map<String,Object>> sendCode(@RequestBody Map<String, Object> params){
-    System.out.println(params);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-  
-  
-  
   
 }

@@ -10,16 +10,18 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 public class LoginCheckInterceptor implements HandlerInterceptor{
 
+  
+ //컨트롤러 동작전에 프리핸들 반환타입 불린 컨트롤러 동작을 시킬건지 아닌지 컨트롤러 동작전에 펄스나 트루 
    @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
      HttpSession session = request.getSession();
-     if(session.getAttribute("user") == null) {
+     if(session.getAttribute("user") == null) { //없다면 
        response.setContentType("text/html; charset=UTF-8");
        PrintWriter out = response.getWriter();
        out.println("<script>");
        out.println("alert('로그인이 필요합니다.')");
-       out.println("history.back()");
+       out.println("history.back()"); 
        out.println("</script>");
        
        return false; 

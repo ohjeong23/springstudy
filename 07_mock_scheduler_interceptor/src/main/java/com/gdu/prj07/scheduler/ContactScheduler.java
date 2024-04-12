@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 //스프링이 때 되면 동작시켜주는거라 객체로 만들어져있어야함 
-@Component //스프링 객체로 만들어줌
+@Component //스프링 객체로 만들어줌  //클래스를 추가해서 컴포넌트로 가져온다 빈
 @RequiredArgsConstructor //final
 @Slf4j
 public class ContactScheduler {
@@ -17,7 +17,7 @@ public class ContactScheduler {
 
   private final ContactService contactService ;
   
-  @Scheduled(cron = "0 40 11 * * *") //크론식
+  @Scheduled(cron = "0 40 11 * * *") //크론식 //동작 시간 붙여주고 아무 메소드를 가져옴
   public void execute() {
     log.info("{}개",contactService.getContactList().size());
     

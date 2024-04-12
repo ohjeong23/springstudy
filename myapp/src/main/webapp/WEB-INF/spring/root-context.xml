@@ -47,11 +47,6 @@
         scope="singleton">
     <constructor-arg ref="sqlSessionFactoryBean"/>
   </bean>
-  
-  <bean class="org.mybatis.spring.mapper.MapperFactoryBean">
-    <property name="mapperInterface" value="com.gdu.myapp.mapper.UserMapper" />
-    <property name="sqlSessionFactory" ref="sqlSessionFactoryBean" />
-  </bean>
 
   <!-- 트랜잭션 관리자 등록 -->
   <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
@@ -66,6 +61,7 @@
     <tx:attributes>
       <tx:method name="*"/>
       <tx:method name="get*" read-only="true"/>
+      <tx:method name="load*" read-only="true"/>
     </tx:attributes>
   </tx:advice>
   
@@ -80,7 +76,7 @@
   <!-- AspectJ 허용 (@EnableAspectJAutoProxy) -->
   <aop:aspectj-autoproxy/>
   
-  <!-- Mapper Interface 가 저장된 패키지 명시 메퍼 패키지가 어디에 있는지 세팅이 필요하다. -->
+  <!-- Mapper Interface 가 저장된 패키지 명시 -->
   <mybatis-spring:scan base-package="com.gdu.myapp.mapper"/>
   
 </beans>

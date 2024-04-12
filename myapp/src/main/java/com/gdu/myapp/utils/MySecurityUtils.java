@@ -1,11 +1,11 @@
 package com.gdu.myapp.utils;
 
-import java.security.MessageDigest; 
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySecurityUtils {//componenet static 쓰면 안써도 됨  //정적 메소드 3개로 개체 생성없이 빈 만들 필요없이
+public class MySecurityUtils {
 
   /*
    * SHA-256
@@ -35,7 +35,7 @@ public class MySecurityUtils {//componenet static 쓰면 안써도 됨  //정적
    *    "<" 기호와 ">" 기호를 엔티티 코드로 변환한다.
    */
   public static String getPreventXss(String original) {
-    return original.replace("<", "&lt;").replace(">", "&gt;");
+    return original.replace("<script>", "&lt;script&gt;").replace("</script>", "&lt;/script&gt;");
   }
   
   /*
